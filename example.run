@@ -1,0 +1,1 @@
+./bloptest -i examples/input -t examples/shortbranches.tree $*
