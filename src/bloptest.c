@@ -80,7 +80,6 @@ static void nl_opt_brlen_optimize(pllInstance * tree,
 		nlopt_set_maxtime(opt, time_limit);
 	}
 	//nlopt_set_maxeval(opt, 500);
-	//nlopt_set_stopval(opt, 24755);
 
 	if (nlopt_optimize(opt, x, &minf) < 0) {
 		printf("nlopt failed!\n");
@@ -232,10 +231,13 @@ int main(int argc, char **argv) {
 	}
 
 	partitions = pllPartitionsCommit(parts, phylip);
+	pllQueuePartitionsDestroy(&parts);
 
 	number_of_taxa = phylip->sequenceCount;
 	seq_len = phylip->sequenceLength;
 	number_of_partitions = partitions->numberOfPartitions;
+
+	pllAlignmentRemoveDups(phylip, partitions);
 
 	pllInstanceAttr attr;
 	attr.fastScaling = false;
@@ -259,6 +261,7 @@ int main(int argc, char **argv) {
 		printf("ERROR loading alignment\n");
 		exit(EXIT_FAILURE);
 	}
+	pllAlignmentDataDestroy(phylip);
 
 	printf("\nSettings:\n\n");
 	printf("  Input file:          %s\n", input_file);
@@ -326,7 +329,12 @@ int main(int argc, char **argv) {
 	print_model(partitions);
 	print_tree(tree, partitions, stdout);
 
+	pllPartitionsDestroy(tree, &partitions);
+	pllDestroyInstance(tree);
+
 	free(branches);
+	free(input_file);
+	free(input_tree);
 
 	return EXIT_SUCCESS;
 }
